@@ -1,1 +1,1 @@
-from .lanplay import *
+from lanplay.lanplay import *

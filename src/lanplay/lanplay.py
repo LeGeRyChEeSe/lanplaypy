@@ -1,42 +1,9 @@
-import re
-import requests
-import typing
-from gql import gql, Client
-from gql.transport.aiohttp import AIOHTTPTransport
-from typing import Optional, List, Dict, Generator
+import re as _re
+from gql import gql as _gql
+from typing import Optional as _Optional, List as _List, Dict as _Dict, Generator as _Generator, Union as _Union, Literal as _Literal
+import lanplay.functions as _functions
 
-list_all_games_url = "https://tinfoil.media/Title/ApiJson/"
-monitors_url = "https://api.uptimerobot.com/v2/getMonitors"
-
-
-def formatUrl(url: str) -> str:
-    """
-        Format an URL with correct syntax.
-    """
-    if not url.startswith("http"):
-        url = "http://" + url
-    if not url.endswith("/"):
-        url = url + "/"
-    return url
-
-
-def _send_query(func):
-    """
-    A decorator that builds and execute a query with all informations needed to send a compliant request to the LAN-PLAY website.
-    """
-    async def inner(self, *args, **kwargs):
-        url: str = kwargs.get('lan_server_url') or args[0]
-        url = formatUrl(url)
-        transport = AIOHTTPTransport(url=url)
-        async with Client(
-            transport=transport
-        ) as session:
-            result = await session.execute(*await func(self, *args, **kwargs))
-            return result
-    return inner
-
-
-class Game():
+class _Game():
     """
         Represents a Nintendo Game.
 
@@ -68,25 +35,121 @@ class Game():
     """
 
     def __init__(self, id: str, name: str, icon: str, release_date: str, publisher: str, size: str, playtime: int, user_rating: float, baseName=None, status=None, regular_price=None, sale_price=None) -> None:
-        self.id = id
-        self.name = re.search(r'<a href="/Title/\w+">(.+?)</a>', name).group(1)
-        self.icon_url = re.search(
+        self._id = id
+        self._name = _re.search(
+            r'<a href="/Title/\w+">(.+?)</a>', name).group(1)
+        self._icon_url = _re.search(
             r"url\s*\(\s*(['\"]?)(.*?)\1\s*\)", icon).group(2)
-        self.release_date = release_date
-        self.publisher = publisher
-        self.size = size
-        self.playtime = playtime
-        self.user_rating = user_rating
-        self.base_name = baseName
-        self.status = status
-        self.regular_price = regular_price
-        self.sale_price = sale_price
+        self._release_date = release_date
+        self._publisher = publisher
+        self._size = size
+        self._playtime = playtime
+        self._user_rating = user_rating
+        self._base_name = baseName
+        self._status = status
+        self._regular_price = regular_price
+        self._sale_price = sale_price
 
     def __repr__(self) -> str:
-        return self.name
+        return self._name
 
+    @property
+    def id(self):
+        return self._id
 
-class Player():
+    @id.setter
+    def id(self):
+        raise AttributeError("The variable is read-only.")
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self):
+        raise AttributeError("The variable is read-only.")
+
+    @property
+    def icon_url(self):
+        return self._icon_url
+
+    @icon_url.setter
+    def icon_url(self):
+        raise AttributeError("The variable is read-only.")
+
+    @property
+    def release_date(self):
+        return self._release_date
+
+    @release_date.setter
+    def release_date(self):
+        raise AttributeError("The variable is read-only.")
+
+    @property
+    def publisher(self):
+        return self._publisher
+
+    @publisher.setter
+    def publisher(self):
+        raise AttributeError("The variable is read-only.")
+
+    @property
+    def size(self):
+        return self._size
+
+    @size.setter
+    def size(self):
+        raise AttributeError("The variable is read-only.")
+
+    @property
+    def playtime(self):
+        return self._playtime
+
+    @playtime.setter
+    def playtime(self):
+        raise AttributeError("The variable is read-only.")
+
+    @property
+    def user_rating(self):
+        return self._user_rating
+
+    @user_rating.setter
+    def user_rating(self):
+        raise AttributeError("The variable is read-only.")
+
+    @property
+    def base_name(self):
+        return self._base_name
+
+    @base_name.setter
+    def base_name(self):
+        raise AttributeError("The variable is read-only.")
+
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self):
+        raise AttributeError("The variable is read-only.")
+
+    @property
+    def regular_price(self):
+        return self._regular_price
+
+    @regular_price.setter
+    def regular_price(self):
+        raise AttributeError("The variable is read-only.")
+
+    @property
+    def sale_price(self):
+        return self._sale_price
+
+    @sale_price.setter
+    def sale_price(self):
+        raise AttributeError("The variable is read-only.")
+
+class _Player():
     """
         Represents a Lan-Play player.
 
@@ -96,13 +159,21 @@ class Player():
     """
 
     def __init__(self, name: str) -> None:
-        self.player_name = name
+        self._player_name = name
 
     def __repr__(self) -> str:
-        return self.player_name
+        return self._player_name
+    
+    @property
+    def player_name(self):
+        return self._player_name
+    
+    @player_name.setter
+    def player_name(self):
+        raise AttributeError("The variable is read-only.")
 
 
-class Room():
+class _Room():
     """
         Represents a Room with players, games and some other data.
 
@@ -125,31 +196,94 @@ class Room():
         game: Actual Game played in the room.
     """
 
-    def __init__(self, contentId: Optional[str] = None, hostPlayerName: Optional[str] = None, nodeCountMax: Optional[int] = None, nodeCount: Optional[int] = None, advertiseData: Optional[str] = None, nodes: Optional[List[Dict]] = None, games_list: Optional[Generator] = None) -> None:
-        self.content_id = '0100B04011742000' if contentId == 'ffffffffffffffff' else contentId
-        self.host_player = Player(hostPlayerName)
-        self.node_count_max = nodeCountMax
-        self.node_count = nodeCount
-        self.advertise_data = advertiseData
-        self.host_player_nintendo_name = bytearray.fromhex(
-            self.advertise_data[56:94].replace('00', '')).decode()
-        self.players = [Player(player.get('playerName'))
+    def __init__(self, contentId: _Optional[str] = None, hostPlayerName: _Optional[str] = None, nodeCountMax: _Optional[int] = None, nodeCount: _Optional[int] = None, advertiseData: _Optional[str] = None, nodes: _Optional[_List[_Dict]] = None, games_list: _Optional[_Generator] = None, encoding: _Union[_Literal['utf-8'], _Literal['utf-16']] = 'utf-8') -> None:
+        self._content_id = '0100B04011742000' if contentId == 'ffffffffffffffff' else contentId
+        self._host_player = _Player(hostPlayerName)
+        self._node_count_max = nodeCountMax
+        self._node_count = nodeCount
+        self._advertise_data = advertiseData
+        self._host_player_nintendo_name = bytearray.fromhex(
+            self._advertise_data[56:94].replace('00', '')).decode(encoding)
+        self._players = [_Player(player.get('playerName'))
                         for player in nodes] if nodes else None
         self._games_list = games_list
-        self.game: Game = None
-        self._setGame()
+        self._game = self.__setGame()
 
     def __repr__(self) -> str:
         return self.__doc__
+    
+    @property
+    def content_id(self):
+        return self._content_id
+    
+    @content_id.setter
+    def content_id(self):
+        raise AttributeError("The variable is read-only.")
+    
+    @property
+    def host_player(self):
+        return self._host_player
+    
+    @host_player.setter
+    def host_player(self):
+        raise AttributeError("The variable is read-only.")
+    
+    @property
+    def node_count_max(self):
+        return self._node_count_max
+    
+    @node_count_max.setter
+    def node_count_max(self):
+        raise AttributeError("The variable is read-only.")
+    
+    @property
+    def node_count(self):
+        return self._node_count
+    
+    @node_count.setter
+    def node_count(self):
+        raise AttributeError("The variable is read-only.")
+    
+    @property
+    def advertise_data(self):
+        return self._advertise_data
+    
+    @advertise_data.setter
+    def advertise_data(self):
+        raise AttributeError("The variable is read-only.")
+    
+    @property
+    def host_player_nintendo_name(self):
+        return self._host_player_nintendo_name
+    
+    @host_player_nintendo_name.setter
+    def host_player_nintendo_name(self):
+        raise AttributeError("The variable is read-only.")
+    
+    @property
+    def players(self):
+        return self._players
+    
+    @players.setter
+    def players(self):
+        raise AttributeError("The variable is read-only.")
+    
+    @property
+    def game(self):
+        return self._game
+    
+    @game.setter
+    def game(self):
+        raise AttributeError("The variable is read-only.")
 
-    def _setGame(self):
-        for game in self._games_list:
-            if game['id'] == self.content_id:
-                self.game = Game(**game)
-                return
+    def __setGame(self):
+        if self._content_id:
+            for game in self._games_list:
+                if game['id'] == self._content_id:
+                    return _Game(**game)
 
 
-class ServerInfo():
+class _ServerInfo():
     """
         Represents a Server Info.
 
@@ -158,14 +292,42 @@ class ServerInfo():
         online: Number of online players.
 
         idle: Number of idle players.
+
+        url: URL of the LanPlay server.
     """
 
-    def __init__(self, online: int, idle: int) -> None:
-        self.online = online
-        self.idle = idle
+    def __init__(self, online: int, idle: int, url: str) -> None:
+        self._online = online - idle
+        self._idle = idle
+        self._url = url
 
     def __repr__(self) -> str:
         return self.__doc__
+    
+    @property
+    def online(self):
+        print(self._online)
+        return self._online
+    
+    @online.setter
+    def online(self):
+        raise AttributeError("The variable is read-only.")
+    
+    @property
+    def idle(self):
+        return self._idle
+    
+    @idle.setter
+    def idle(self):
+        raise AttributeError("The variable is read-only.")
+    
+    @property
+    def url(self):
+        return self._url
+    
+    @url.setter
+    def url(self):
+        raise AttributeError("The variable is read-only.")
 
 
 class LanPlay():
@@ -186,35 +348,62 @@ class LanPlay():
     """
 
     def __init__(self, LAN_PLAY_API_KEY: str) -> None:
-        self.rooms: List[Room] = []
-        self.server_info: ServerInfo = None
-        self.servers = self._getLanServers(LAN_PLAY_API_KEY)
-        self.all_games_url_list = requests.get(list_all_games_url)
-        self.all_games_url_list: Dict = self.all_games_url_list.json(
-        ) if self.all_games_url_list.ok else self.all_games_url_list
+        self._rooms: _List[_Room] = []
+        self._server_info: _ServerInfo = None
+        self._servers = _functions._getLanServers(LAN_PLAY_API_KEY)
+        self._all_games_url_list = _functions._getAllGamesUrlList()
 
     def __repr__(self) -> str:
         return self.__doc__
 
-    def _getLanServers(self, API_KEY: str) -> typing.Dict:
-        response = requests.post(monitors_url, json={
-                                 "api_key": API_KEY, "format": "json", "all_time_uptime_ratio": 1})
-        return response.json()
+    @property
+    def rooms(self):
+        return self._rooms
+    
+    @rooms.setter
+    def rooms(self):
+        raise AttributeError("The variable is read-only.")
+    
+    @property
+    def server_info(self):
+        return self._server_info
+    
+    @server_info.setter
+    def server_info(self):
+        raise AttributeError("The variable is read-only.")
+    
+    @property
+    def servers(self):
+        return self._servers
+    
+    @servers.setter
+    def servers(self):
+        raise AttributeError("The variable is read-only.")
+    
+    @property
+    def all_games_url_list(self):
+        return self._all_games_url_list
+    
+    @all_games_url_list.setter
+    def all_games_url_list(self):
+        raise AttributeError("The variable is read-only.")
 
-    def _setServerInfos(func):
+    def __setServerInfos(func):
         async def inner(self, *args, **kwargs):
+            lan_server_url = kwargs.get('lan_server_url') or (args[0] if len(args) > 0 else self._server_info.url if isinstance(self._server_info, _ServerInfo) else None)
             result = await func(self, *args, **kwargs)
             if 'room' in result:
+                self._rooms = []
                 for room in result['room']:
-                    self.rooms.append(
-                        Room(**room, games_list=(game for game in self.all_games_url_list['data'])))
+                    self._rooms.append(
+                        _Room(**room, games_list=(game for game in self._all_games_url_list['data'])))
             if 'serverInfo' in result:
-                self.server_info = ServerInfo(*result['serverInfo'])
+                self._server_info = _ServerInfo(**result['serverInfo'], url=lan_server_url)
             return result
         return inner
 
-    @_setServerInfos
-    @_send_query
+    @__setServerInfos
+    @_functions._sendQuery
     async def setServer(self, lan_server_url: str) -> None:
         """
             Set current working Lan-Play URL.
@@ -223,7 +412,7 @@ class LanPlay():
             ----------
             lan_server_url: URL of the Lan-Play server.
         """
-        query = gql("""   
+        query = _gql("""   
         query getUsers {
             room {
                 contentId
@@ -243,3 +432,32 @@ class LanPlay():
         """)
 
         return query,
+
+    @__setServerInfos
+    @_functions._sendQuery
+    async def refreshServer(self) -> None:
+        lan_server_url = self._server_info.url if isinstance(self._server_info, _ServerInfo) else None
+
+        if lan_server_url:
+            query = _gql("""   
+            query getUsers {
+                room {
+                    contentId
+                    hostPlayerName
+                    nodeCountMax
+                    nodeCount
+                    advertiseData
+                    nodes {
+                        playerName
+                    }
+                }
+                serverInfo {
+                    online
+                    idle
+                }
+            }
+            """)
+
+            return query,
+        else:
+            raise AttributeError("No server set yet.")

@@ -6,3 +6,4 @@ dist/
 .python-version
 build/
 tests/
+changelog.d/

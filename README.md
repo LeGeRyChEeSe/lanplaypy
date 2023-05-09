@@ -17,8 +17,9 @@ It's made for getting servers, rooms, games and players easily from LanPlay API.
 It was designed to make life easier for developers with LanPlay. It’s a more direct and simple interface with the API.
 <p align="center">
 
-## Table of Contents
+# Table of Contents
 - [Installation](#installation)
+- [Get API Key](#get-api-key)
 - [Script Example](#script-example)
 - [Contributing](#contributing)
 - [License](#license)
@@ -29,47 +30,100 @@ It was designed to make life easier for developers with LanPlay. It’s a more d
 pip install lanplaypy
 ```
 
-## Script Example
+## Get API Key
+To use the LanPlay package you will need a specific, non-transferable API key that can be retrieved from <a href="http://www.lan-play.com">LanPlay</a>.<br>
+Please follow these steps :
 
-- Here is an example of a simple script using LanPlay API
+1. Open a Web Browser and go to http://www.lan-play.com
+2. Open a Console Mode (<b>Ctrl + Shift + C</b> should work, or Google is your friend to find how to access the Console Mode 🫠)
+3. Go to <b>Network</b> tab and refresh the current page
+4. Search a line named <b>getMonitors</b> and click on it
+5. Open the <b>Payload</b> tab
+6. Copy the <b>api_key</b> value and paste it into the <b>LanPlay('LAN_PLAY_API_KEY')</b> definition below (replace 'LAN_PLAY_API_KEY' with the <b>api_key</b> value)
+
+
+## Script Example
+### Before doing anything be sure to get your <b>api_key</b> from [Get API Key](#get-api-key) section
+Here is an example of a simple script using LanPlay API that gets server infos refreshed every 1 second
 
 ```python
 import asyncio
 import lanplay
+import time
+import os
 
-# The LAN_PLAY_API_KEY can be found in the Console Mode of any Web Browser by following these steps:
-# - Open a Web Browser and go to http://www.lan-play.com
-# - Open a Console Mode ('Ctrl + Shift + C' should work, or else Google is your friend :))
-# - Go to 'Network' tab and refresh the current page
-# - Search a line named 'getMonitors' and click on it
-# - Open the 'Payload' tab
-# - Copy the 'api_key' value and paste it into the LanPlay('LAN_PLAY_API_KEY') definition below
 
-async def main():
+async def main(time_to_refresh: int = 1):
+    # time_to_refresh let you update the informations of the server every 1 seconds
+    # You can change this variable from execution in loop.run_until_complete(main()) at the end of this script with some other values
+    # For example to update the infos of the server every 0.5 seconds or 500ms, you can use await main(0.5)
+
+    lan = lanplay.LanPlay('LAN_PLAY_API_KEY')
     # Create an instance of the LanPlay class with LAN_PLAY_API_KEY
     # It's the main variable where all data will be stored
-    lan = lanplay.LanPlay('LAN_PLAY_API_KEY')
 
-    # Initialize the server
-    await lan.setServer('joinsg.net:11453') # Or 'http:/joinsg.net:11453/' will works too
+    print('List of all LanPlay servers available : ', lan.servers)
+    # Useful when you don't know wich LanPlay server to choose...
+
+    await lan.setServer('joinsg.net:11453')
+    # Initialize the server with any LanPlay server you want
+    # Here is an example with the joinsg.net:11453 server
+    # Replace with 'http:/joinsg.net:11453/' will works too
 
     # You can now access all data from 'lan' variable
-    # Here are some useful examples below    
-    for room in lan.rooms:
-        # Display games info of a room
-        print(room.host_player_nintendo_name)   # Unique Nintendo host player name
-        print(room.game.name)       # Or 'room.game' will also displays the name of the game
-        print(room.game.icon_url)   # Useful when you want a cool picture of the current game played
-        print(room.game.size)       # To see if you've enough space to download this game on your Switch...
-        
-        for player in room.players:
-            # Display players infos of a room
-            print(player.player_name)   # Or 'player' will also displays the name of the player
 
-    print(lan.server_info.online)   # Displays the current number of Online players in the server
-    print(lan.server_info.idle)     # Displays the current number of Idle players in the server
+    while True:
+        os.system('clear')
+        # Clear the console to get a clean UI with updated server's infos
 
-    print(lan.servers)      # Useful when you don't know wich LanPlay server to choose...
+        # See below some useful examples
+
+        for room in lan.rooms:
+            # Display games info of a room
+
+            print(room.advertise_data)
+            print(f'Room {lan.rooms.index(room) + 1} :')
+            print('Host Player : ', room.host_player)
+            print('Unique Nintendo Host Player Name : ',
+                  room.host_player_nintendo_name)
+            # Unique Nintendo host player name
+
+            if room.game:
+                print('Game : ', room.game.name)
+                # Or 'room.game' will also displays the name of the game
+
+                print('Icon URL of the Game : ', room.game.icon_url)
+                # Useful when you want a cool picture of the current game played
+
+                print('Game Size : ', room.game.size)
+                # To see if you've enough space to download this game on your Switch...
+
+                print('Publisher of the Game : ', room.game.publisher)
+                # Get the publisher of the actual played game
+
+            print('Max Players number in the room : ', room.node_count_max)
+            # Max Players allowed to play in a room
+
+            print('Actual number of Players in the room: ', room.node_count)
+            # Actual number of Players playing in a room
+
+            for player in room.players:
+                # Display players infos of a room
+
+                print(f'Player {room.players.index(player) + 1} : ', player)
+                # Or 'player.player_name' will also displays the name of the player
+
+        print('Players Online : ', lan.server_info.online)
+        # Displays the current number of Online players in the server
+
+        print('Players Idle : ', lan.server_info.idle)
+        # Displays the current number of Idle players in the server
+
+        await lan.refreshServer()
+        # Function that refresh all infos of the server, rooms, games and players to stay up-to-date
+
+        time.sleep(time_to_refresh)
+        # Wait 'time_to_refresh' seconds (1 second in this example) before continue the loop
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())

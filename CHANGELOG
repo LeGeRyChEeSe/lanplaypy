@@ -1,0 +1,26 @@
+1.1.0 (2023-05-09)
+==================
+
+Security Fixes
+--------------
+- Improve security and data integrity assurance in general.
+
+New Features
+------------
+- Changed how to access the attributes of a class instance. (Transparent to the user.)
+
+Bug Fixes
+---------
+- Fixed codec decoding. Please use 'utf-8' or 'utf-16' in Room(encoding='utf-X').
+
+Improvements
+------------
+- Optimize class access and remove some useless data accesses for the user. It's a more clean coding environment now.
+
+Documentation
+-------------
+- Update the example script with more code explanation and more user-friendly UI.
+
+- Clarify the steps to get the api_key value from LanPlay website. Update some other infos.
+
+
